@@ -1,3 +1,11 @@
+// null
+// [1, null]
+// [1, [2, null]]
+// [1, [2, null]]
+// [1, [2, [3, null]]]
+
+// implementing linked list representing functions
+
 function cons(first, next) {
   return function (idx) {
     if (idx === 0)
