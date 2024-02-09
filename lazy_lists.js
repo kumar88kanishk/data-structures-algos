@@ -78,6 +78,17 @@ function toArray(list) {
     return [first(list), ...toArray(rest(list))]
 }
 
+function iterate(e, f) {
+  return cons(f(e), delay(() => iterate(f(e), f)))
+}
+
+function take(n, list) {
+  if (n === 0)
+    return []
+  else
+    return [first(list), ...take(n - 1, rest(list))]
+}
+
 let l = cons(1, null)
 l = cons(2, l)
 l = cons(3, l)
@@ -86,5 +97,5 @@ l = cons(5, l)
 l = cons(6, l)
 l = cons(7, l)
 
-console.log(toString(filter(map(l, x => x + 1), (x) => x % 2 === 0)))
-// console.log(toArray(map(l, x => x + 1)))
+// console.log(toString(filter(map(l, x => x + 1), (x) => x % 2 === 0)))
+console.log(take(105, iterate(0, (x) => x + 1)))
