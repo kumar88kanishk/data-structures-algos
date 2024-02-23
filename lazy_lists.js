@@ -12,7 +12,7 @@ class Thunk {
     else {
       this.cacheValue = this.f()
       this.cached = true
-      return this.f()
+      return this.cacheValue
     }
 
   }
@@ -72,30 +72,34 @@ function toString(list) {
 }
 
 function toArray(list) {
-  if (list === null)
-    return []
-  else
-    return [first(list), ...toArray(rest(list))]
+  let a = []
+  while (list !== null) {
+    a.push(first(list))
+    list = rest(list)
+  }
+  return a;
 }
 
 function iterate(e, f) {
   return cons(f(e), delay(() => iterate(f(e), f)))
 }
 
+// function take(n, list) {
+//   if (n === 0)
+//     return []
+//   else
+//     return [first(list), ...take(n - 1, rest(list))]
+// }
+
 function take(n, list) {
   if (n === 0)
-    return []
+    return null
   else
-    return [first(list), ...take(n - 1, rest(list))]
+    return cons(first(list), delay(() => take(n - 1, rest(list))))
+  // return [first(list), ...take(n - 1, rest(list))]
 }
 
-let l = cons(1, null)
-l = cons(2, l)
-l = cons(3, l)
-l = cons(4, l)
-l = cons(5, l)
-l = cons(6, l)
-l = cons(7, l)
-
+let l = take(50000, iterate(0, (x) => x + 1))
+console.log(toArray(filter(map(l, x => x + 1), (x) => x % 2 === 0)))
 // console.log(toString(filter(map(l, x => x + 1), (x) => x % 2 === 0)))
-console.log(take(105, iterate(0, (x) => x + 1)))
+// console.log(toArray(take(1, iterate(0, (x) => x + 1))))
