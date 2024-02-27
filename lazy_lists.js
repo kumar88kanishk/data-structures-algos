@@ -84,22 +84,42 @@ function iterate(e, f) {
   return cons(f(e), delay(() => iterate(f(e), f)))
 }
 
-// function take(n, list) {
-//   if (n === 0)
-//     return []
-//   else
-//     return [first(list), ...take(n - 1, rest(list))]
-// }
-
-function take(n, list) {
+function take(list, n) {
   if (n === 0)
     return null
   else
-    return cons(first(list), delay(() => take(n - 1, rest(list))))
-  // return [first(list), ...take(n - 1, rest(list))]
+    return cons(first(list), delay(() => take(rest(list), n - 1)))
 }
 
-let l = take(50000, iterate(0, (x) => x + 1))
-console.log(toArray(filter(map(l, x => x + 1), (x) => x % 2 === 0)))
-// console.log(toString(filter(map(l, x => x + 1), (x) => x % 2 === 0)))
-// console.log(toArray(take(1, iterate(0, (x) => x + 1))))
+function doAll(list) {
+  if (list === null)
+    return null
+  else
+    return cons(first(list), doAll(rest(list)))
+}
+
+function generateList(n) {
+  let l = null
+  for (let i = n; i >= 0; i--) {
+    l = cons(i, l)
+  }
+  return l;
+}
+
+
+function benchmark(f, post = (x) => x) {
+  let start = Date.now()
+  let result = f()
+  let end = Date.now()
+  console.log(post(result))
+  console.log(end - start + "ms")
+}
+
+let double = (x) => x * 2
+let isEven = (x) => x % 2 === 0
+
+let l4 = generateList(8000)
+benchmark(() => doAll(take(filter(map(l4, double), isEven), 50)), toArray)
+
+let l5 = generateList(8000)
+benchmark(() => first(take(filter(map(l5, double), isEven), 50)))
