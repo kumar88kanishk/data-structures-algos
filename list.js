@@ -59,16 +59,35 @@ function filter(list, f) {
 
 function generateList(n) {
   let l = null
-  for (let i = 0; i < n; i++) {
+  for (let i = n; i >= 0; i--) {
     l = cons(i, l)
   }
   return l;
 }
+// (0, null)
+// (0, (1, null))
+// (0, (1, (2, null)))
+function take(list, n) {
+  if (n === 0)
+    return null
+  else
+    return cons(first(list), take(rest(list), n - 1))
+}
 
-let l1 = cons(1, null)
-let l2 = cons(2, l1)
-let l3 = cons(3, l2)
 
-let l4 = generateList(10000)
-// console.log(length(map((x) => x + 1, l3)))
-console.log(toArray(filter(l4, (x) => x % 2 != 0)))
+function benchmark(f, post = (x) => x) {
+  let start = Date.now()
+  let result = f()
+  let end = Date.now()
+  console.log(post(result))
+  console.log(end - start + "ms")
+}
+
+let double = (x) => x * 2
+let isEven = (x) => x % 2 === 0
+
+let l4 = generateList(8000)
+benchmark(() => take(filter(map(l4, double), isEven), 50), toArray)
+
+let l5 = generateList(8000)
+benchmark(() => first(take(filter(map(l5, double), isEven), 50)))
