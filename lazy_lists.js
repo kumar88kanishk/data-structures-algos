@@ -118,8 +118,8 @@ function benchmark(f, post = (x) => x) {
 let double = (x) => x * 2
 let isEven = (x) => x % 2 === 0
 
-let l4 = generateList(8000)
+let l4 = generateList(1000000)
 benchmark(() => doAll(take(filter(map(l4, double), isEven), 50)), toArray)
 
-let l5 = generateList(8000)
+let l5 = generateList(1000000)
 benchmark(() => first(take(filter(map(l5, double), isEven), 50)))
