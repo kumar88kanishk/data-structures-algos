@@ -39,11 +39,13 @@ function test(size) {
   }
 
   let arr = [...Array(size).keys()]
-  let shuffled = shuffle(arr)
+  let shuffled = [...arr].reverse()
+  let start = Date.now()
   let sorted = sort(shuffled)
-
+  let end = Date.now()
   console.log(arr[0] === sorted[0]
     && arr.at(-1) === sorted.at(-1))
+  console.log(end - start + "ms")
 }
 
-test(10)
+test(1000)
