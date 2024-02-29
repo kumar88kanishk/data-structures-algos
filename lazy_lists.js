@@ -92,10 +92,11 @@ function take(list, n) {
 }
 
 function doAll(list) {
-  if (list === null)
-    return null
-  else
-    return cons(first(list), doAll(rest(list)))
+  let curr = list
+  while (curr !== null) {
+    curr = rest(curr)
+  }
+  return list
 }
 
 function generateList(n) {
