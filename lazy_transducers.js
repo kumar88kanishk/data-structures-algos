@@ -24,6 +24,44 @@ class Accumlated {
   }
 }
 
+function unAccumlated(acc) {
+  if (acc instanceof Accumlated)
+    return acc.val
+  return null
+}
+
+function isAccumlated(acc) {
+  return (acc instanceof Accumlated)
+}
+
+function accumlate(acc, x) {
+  return new Accumlated(x)
+}
+
+class Reduced {
+  constructor(val) {
+    this.val = val
+  }
+}
+
+function unReduced(red) {
+  if (red instanceof Reduced)
+    return red.val
+  return null
+}
+
+function isReduced(red) {
+  return (red instanceof Reduced)
+}
+
+function reduced(item) {
+  if (!isReduced(item))
+    return new Reduced(item)
+  else
+    return item
+}
+
+
 function delay(f) {
   return new Thunk(f)
 }
@@ -75,14 +113,15 @@ function filtering(f) {
 }
 
 function taking(n) {
-  let taken = 0
   return function (rf) {
+    let taken = 0
     return function (acc, x) {
       if (taken < n) {
         taken = taken + 1
         return rf(acc, x)
-      } else
-        return acc
+      } else {
+        return reduced(acc)
+      }
     }
   }
 }
@@ -97,34 +136,47 @@ function comp(...fs) {
   }
 }
 
-function lazyTransduceArr(arr, xf) {
-  if (arr.length === 0)
-    return null
-  else {
-    let [x, ...more] = arr
-    let rf = xf((_, v) => new Accumlated(v))
-    let result = rf(null, x)
+// function lazyTransduceArr(arr, xf) {
+//   if (arr.length === 0)
+//     return null
+//   else {
+//     let [x, ...more] = arr
+//     let rf = xf((_, v) => new Accumlated(v))
+//     let result = rf(null, x)
 
-    if (result instanceof Accumlated) {
-      return cons(result.val, delay(() => lazyTransduceArr(more, xf)))
-    } else {
-      return lazyTransduceArr(more, xf)
-    }
-  }
-}
+//     if (result instanceof Accumlated) {
+//       return cons(result.val, delay(() => lazyTransduceArr(more, xf)))
+//     } else {
+//       return lazyTransduceArr(more, xf)
+//     }
+//   }
+// }
 
-function lazyTransduceList(list, xf) {
+function lazyReduce(list, rf) {
   while (list !== null) {
     let x = first(list), more = rest(list)
-    let rf = xf((_, v) => new Accumlated(v))
     let result = rf(null, x)
-    if (result instanceof Accumlated) {
-      return cons(result.val, delay(() => lazyTransduceList(more, xf)))
+    if (isReduced(result)) {
+      result = unReduced(result)
+      if (isAccumlated(result)) {
+        return cons(unAccumlated(result), null)
+      } else {
+        return null;
+      }
     } else {
-      list = more
+      if (isAccumlated(result)) {
+        return cons(unAccumlated(result), delay(() => lazyReduce(more, rf)))
+      } else {
+        list = more
+      }
     }
   }
   return null
+}
+
+function lazyTransduceList(list, xf) {
+  let rf = xf(accumlate)
+  return lazyReduce(list, rf)
 }
 
 function toArray(list) {
@@ -170,24 +222,19 @@ function doAll(list) {
 let inc = (x) => x + 1
 let isEven = (x) => x % 2 === 0
 
-
 let xf1 = comp(
   mapping(inc),
   filtering(isEven),
-  taking(50)
+  taking(10000)
 )
 let l1 = generateList(10000000)
 benchmark(() => doAll(lazyTransduceList(l1, xf1)), toArray)
 
+
 let xf2 = comp(
   mapping(inc),
   filtering(isEven),
-  taking(50)
+  taking(10000)
 )
 let l2 = generateList(10000000)
-let start = Date.now()
-console.log(first(lazyTransduceList(l2, xf2)))
-let end = Date.now()
-console.log(end - start + "ms")
-
-// benchmark(() => doAll(lazyTransduceList(l2, xf2)), toArray)
+benchmark(() => first(lazyTransduceList(l2, xf2)))
