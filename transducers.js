@@ -4,12 +4,30 @@ class Reduced {
   }
 }
 
+function unReduced(red) {
+  if (red instanceof Reduced)
+    return red.val
+  return null
+}
+
+function isReduced(red) {
+  return (red instanceof Reduced)
+}
+
+function reduced(item) {
+  if (!isReduced(item))
+    return new Reduced(item)
+  else
+    return item
+}
+
+
 function reduce(arr, f, init) {
   let acc = init
   for (let x of arr) {
     acc = f(acc, x)
-    if (acc instanceof Reduced) {
-      acc = acc.val
+    if (isReduced(acc)) {
+      acc = unReduced(acc)
       break;
     }
   }
@@ -49,7 +67,7 @@ function taking(n) {
         taken = taken + 1
         return rf(acc, x)
       } else {
-        return new Reduced(acc)
+        return reduced(acc)
       }
     }
   }
@@ -94,7 +112,7 @@ let l4 = generateArray(10000000)
 let tx1 = comp(
   mapping(double),
   filtering(isEven),
-  taking(50)
+  taking(10000)
 )
 benchmark(() => transduce(l4, tx1))
 
@@ -103,16 +121,9 @@ let l5 = generateArray(10000000)
 let tx2 = comp(
   mapping(double),
   filtering(isEven),
-  taking(50)
+  taking(10000)
 )
 benchmark(() => transduce(l5, tx2)[0])
-
-// let a = [1, 2, 3]
-// let inc = x => x + 1
-// let isEven = x => x % 2 === 0
-
-// console.log()
-
 
 // transducers are generic wasy to write sequence operations
 // Performance
