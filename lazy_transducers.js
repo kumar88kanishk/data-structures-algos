@@ -135,23 +135,6 @@ function comp(...fs) {
     return acc
   }
 }
-
-// function lazyTransduceArr(arr, xf) {
-//   if (arr.length === 0)
-//     return null
-//   else {
-//     let [x, ...more] = arr
-//     let rf = xf((_, v) => new Accumlated(v))
-//     let result = rf(null, x)
-
-//     if (result instanceof Accumlated) {
-//       return cons(result.val, delay(() => lazyTransduceArr(more, xf)))
-//     } else {
-//       return lazyTransduceArr(more, xf)
-//     }
-//   }
-// }
-
 function lazyReduce(list, rf) {
   while (list !== null) {
     let x = first(list), more = rest(list)

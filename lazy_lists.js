@@ -120,7 +120,7 @@ let double = (x) => x * 2
 let isEven = (x) => x % 2 === 0
 
 let l4 = generateList(1000000)
-benchmark(() => doAll(take(filter(map(l4, double), isEven), 50)), toArray)
+benchmark(() => doAll(take(filter(map(l4, double), isEven), 10000)), toArray)
 
 let l5 = generateList(1000000)
-benchmark(() => first(take(filter(map(l5, double), isEven), 50)))
+benchmark(() => first(take(filter(map(l5, double), isEven), 10000)))
