@@ -4,32 +4,71 @@
 // [1, [2, null]]
 // [1, [2, [3, null]]]
 
-// implementing linked list representing functions
-
-function cons(first, next) {
-  return function (idx) {
-    if (idx === 0)
-      return first
-    else if (idx === 1)
-      return next
-    else
-      return new Error()
+// implementing linked list representing arrays
+class Thunk {
+  constructor(f) {
+    this.f = f;
   }
 }
 
+function trampoline(thunk) {
+  let res = thunk.f();
+  while (res instanceof Thunk)
+    res = res.f();
+  return res;
+}
+
+function unCPS(f) {
+  return (...args) =>
+    trampoline(f(x => x, ...args));
+}
+
+function cons(first, next) {
+  return [first, next]
+}
+
 function first(list) {
-  return list(0)
+  return list[0]
 }
 
 function rest(list) {
-  return list(1)
+  return list[1]
 }
 
-function map(list, f) {
+// Function result is in K
+
+function cps_map(k, list, f) {
   if (list === null)
-    return list
+    return k(null)
   else
-    return cons(f(first(list)), map(rest(list), f))
+    return new Thunk(() =>
+      cps_map(mappedRest => {
+        let mappedFirst = f(first(list))
+        return new Thunk(() => k(cons(mappedFirst, mappedRest)))
+      }, rest(list), f))
+}
+
+function cps_filter(k, list, f) {
+  if (list === null)
+    return k(null)
+  else
+    return new Thunk(() =>
+      cps_filter((filteredRest) => {
+        if (f(first(list))) {
+          return new Thunk(() => k(cons(first(list), filteredRest)))
+        } else {
+          return new Thunk(() => k(filteredRest))
+        }
+      }, rest(list), f))
+}
+
+function cps_take(k, list, n) {
+  if (n === 0)
+    return k(null)
+  else
+    return new Thunk(() => cps_take((taken) => {
+      return new Thunk(() => k(cons(first(list), taken)))
+    }, rest(list), n - 1))
 }
 
 function toArray(list) {
@@ -48,14 +87,6 @@ function length(list) {
     return 1 + length(rest(list))
 }
 
-function filter(list, f) {
-  if (list === null)
-    return list
-  else if (f(first(list)))
-    return cons(first(list), filter(rest(list), f))
-  else
-    return filter(rest(list), f)
-}
 
 function generateList(n) {
   let l = null
@@ -64,16 +95,6 @@ function generateList(n) {
   }
   return l;
 }
-// (0, null)
-// (0, (1, null))
-// (0, (1, (2, null)))
-function take(list, n) {
-  if (n === 0)
-    return null
-  else
-    return cons(first(list), take(rest(list), n - 1))
-}
-
 
 function benchmark(f, post = (x) => x) {
   let start = Date.now()
@@ -83,11 +104,16 @@ function benchmark(f, post = (x) => x) {
   console.log(end - start + "ms")
 }
 
-let double = (x) => x * 2
+let inc = (x) => x + 1
 let isEven = (x) => x % 2 === 0
 
-let l4 = generateList(8000)
-benchmark(() => take(filter(map(l4, double), isEven), 50), toArray)
+let map = unCPS(cps_map)
+let filter = unCPS(cps_filter)
+let take = unCPS(cps_take)
 
-let l5 = generateList(8000)
-benchmark(() => first(take(filter(map(l5, double), isEven), 50)))
+let l1 = generateList(1000000)
+
+benchmark(() => take(filter(map(l1, inc), isEven), 10000), toArray)
+
+let l2 = generateList(1000000)
+benchmark(() => first(take(filter(map(l2, inc), isEven), 10000)))
