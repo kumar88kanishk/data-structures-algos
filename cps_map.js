@@ -17,31 +17,29 @@ function unCPS(f) {
 }
 
 
-function map(arr, f, init) {
-  if (arr.length === 0) {
-    return init
-  } else {
-    let more = arr.slice(1)
-    return map(more, f, [...init, f(arr[0])])
-  }
-}
+// function map(arr, f, init) {
+//   if (arr.length === 0) {
+//     return init
+//   } else {
+//     let more = arr.slice(1)
+//     return map(more, f, [...init, f(arr[0])])
+//   }
+// }
 
 // let testMap = map([...Array(50000).keys()], (e) => e + 1, [])
 // console.log(testMap)
 
-function cps_map(k, arr, cps_f, init) {
-  if (arr.length === 0) {
-    return new Thunk(() => k(init))
-  } else {
-    return new Thunk(() => {
-      return cps_f((acc) => {
-        let more = arr.slice(1)
-        return cps_map(k, more, cps_f, [...init, acc])
-      }, arr[0])
-    })
-  }
+function cps_map(k, list, f) {
+  if (list === null)
+    return k(null)
+  else
+    return new Thunk(() =>
+      cps_map(mappedRest => {
+        let mappedFirst = f(first(list))
+        return new Thunk(() => k(cons(mappedFirst, mappedRest)))
+      }, rest(list), f))
 }
 
-
-let dirMap = unCPS(cps_map)``
-console.log(JSON.stringify(dirMap([...Array(50000).keys()], (k, e) => k(e + 1), [])))
+let map = unCPS(cps_map)
+let inc = (x) => x + 1
+console.log(JSON.stringify(map([...Array(50).keys()], inc)))
