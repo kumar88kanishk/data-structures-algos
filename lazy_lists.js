@@ -107,6 +107,14 @@ function generateList(n) {
   return l;
 }
 
+function reduce(list, rf, init) {
+  let acc = init
+  while (list != null) {
+    acc = rf(acc, first(list))
+    list = rest(list)
+  }
+  return acc
+}
 
 function benchmark(f, post = (x) => x) {
   let start = Date.now()
@@ -116,11 +124,24 @@ function benchmark(f, post = (x) => x) {
   console.log(end - start + "ms")
 }
 
-let double = (x) => x * 2
+// chain(l4, [map, inc], [filter, isEven], [take, 40], [doAll], [reduce, add, 0])
+// chain(l, [map, inc])
+
+function chain(list, ...pairs) {
+  let result = list
+  for (let pair of pairs) {
+    let [seqFn, ...args] = pair
+    result = seqFn(result, ...args)
+  }
+  return result
+}
+
+let inc = (x) => x + 1
 let isEven = (x) => x % 2 === 0
+let add = (a, b) => a + b
 
 let l4 = generateList(1000000)
-benchmark(() => doAll(take(filter(map(l4, double), isEven), 10000)), toArray)
+benchmark(() => chain(l4, [map, inc], [filter, isEven], [take, 10000], [doAll]), toArray)
 
 let l5 = generateList(1000000)
-benchmark(() => first(take(filter(map(l5, double), isEven), 10000)))
+benchmark(() => chain(l4, [map, inc], [filter, isEven], [take, 10000], [first]))
