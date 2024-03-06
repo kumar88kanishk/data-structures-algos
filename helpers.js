@@ -97,3 +97,43 @@ function rest(list) {
   // else
   //   return list(1)
 }
+
+function toArray(list) {
+  let a = []
+  while (list !== null) {
+    a.push(first(list))
+    list = rest(list)
+  }
+  return a;
+}
+function generateList(n) {
+  let l = null
+  for (let i = n; i >= 0; i--) {
+    l = cons(i, l)
+  }
+  return l;
+}
+
+function generateArray(n) {
+  let l = []
+  for (let i = 0; i <= n; i++) {
+    l.push(i)
+  }
+  return l;
+}
+
+function benchmark(f, post = (x) => x) {
+  let start = Date.now()
+  let result = f()
+  let end = Date.now()
+  console.log(post(result))
+  console.log(end - start + "ms")
+}
+
+function doAll(list) {
+  let curr = list
+  while (curr !== null) {
+    curr = rest(curr)
+  }
+  return list
+}
