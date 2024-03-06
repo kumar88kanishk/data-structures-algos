@@ -1,26 +1,6 @@
-class Reduced {
-  constructor(val) {
-    this.val = val
-  }
-}
-
-function unReduced(red) {
-  if (red instanceof Reduced)
-    return red.val
-  return null
-}
-
-function isReduced(red) {
-  return (red instanceof Reduced)
-}
-
-function reduced(item) {
-  if (!isReduced(item))
-    return new Reduced(item)
-  else
-    return item
-}
-
+import {
+  reduced, benchmark, generateArray, push, isReduced, unReduced
+} from './helpers.cjs'
 
 function reduce(arr, f, init) {
   let acc = init
@@ -32,11 +12,6 @@ function reduce(arr, f, init) {
     }
   }
   return acc;
-}
-
-function push(arr, x) {
-  arr.push(x)
-  return arr
 }
 
 
@@ -86,23 +61,6 @@ function comp(...fs) {
       acc = fs[i](acc)
     return acc
   }
-}
-
-function generateArray(n) {
-  let l = []
-  for (let i = 0; i <= n; i++) {
-    l.push(i)
-  }
-  return l;
-}
-
-
-function benchmark(f, post = (x) => x) {
-  let start = Date.now()
-  let result = f()
-  let end = Date.now()
-  console.log(post(result))
-  console.log(end - start + "ms")
 }
 
 let double = (x) => x * 2
