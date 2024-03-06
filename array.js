@@ -1,15 +1,15 @@
-class Reduced {
-  constructor(val) {
-    this.val = val
-  }
-}
+import {
+  isReduced, cons, first, rest,
+  isAccumlated, reduced, accumlate, delay, toArray, benchmark,
+  generateArray, doAll, unAccumlated, unReduced
+} from './helpers.cjs'
 
 function reduce(arr, f, init) {
   let acc = init
   for (let x of arr) {
     acc = f(acc, x)
-    if (acc instanceof Reduced) {
-      acc = acc.val
+    if (isReduced(acc)) {
+      acc = unReduced(acc)
       break;
     }
   }
@@ -41,25 +41,8 @@ function take(arr, n) {
       c = c + 1
       return push(acc, x)
     } else
-      return new Reduced(acc)
+      return reduced(acc)
   }, [])
-}
-
-function generateArray(n) {
-  let l = []
-  for (let i = 0; i <= n; i++) {
-    l.push(i)
-  }
-  return l;
-}
-
-
-function benchmark(f, post = (x) => x) {
-  let start = Date.now()
-  let result = f()
-  let end = Date.now()
-  console.log(post(result))
-  console.log(end - start + "ms")
 }
 
 let double = (x) => x * 2
