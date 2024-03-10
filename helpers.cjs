@@ -1,3 +1,6 @@
+// class Thunk to encapsulate the computation withibn itself. 
+// When asked to compute, provides value from cache if present, else computes and saves in cache
+
 class Thunk {
   constructor(f) {
     this.f = f
@@ -68,7 +71,7 @@ const reduced = (item) => {
     return item
 }
 
-
+// fn accepts a f and return a thunk (a computation to be performed later) with f in it
 function delay(f) {
   return new Thunk(f)
 }
@@ -150,10 +153,16 @@ function push(arr, x) {
   arr.push(x)
   return arr
 }
+function toString(list) {
+  if (list === null)
+    return new String()
+  else
+    return new String(first(list)) + toString(rest(list))
+}
 
 
 module.exports = {
   isThunk, thunkfy, isReduced, cons, first, rest,
   isAccumlated, reduced, accumlate, delay, toArray, generateArray,
-  generateList, benchmark, doAll, unAccumlated, unReduced, push
+  generateList, benchmark, doAll, unAccumlated, unReduced, push, toString
 }
