@@ -1,52 +1,8 @@
-// class Thunk to encapsulate the computation withibn itself. 
-// When asked to compute, provides value from cache if present, else computes and saves in cache
-class Thunk {
-  constructor(f) {
-    this.f = f
-    this.cached = false
-    this.cacheValue = null
-  }
-  realize() {
-    if (this.cached)
-      return this.cacheValue
-    else {
-      this.cacheValue = this.f()
-      this.cached = true
-      return this.cacheValue
-    }
-
-  }
-}
-// fn accepts a f and return a thunk (a computation to be performed later) with f in it
-function delay(f) {
-  return new Thunk(f)
-}
-
-// fn accepts first and next and returns a function
-function cons(first, next) {
-  return function (idx) {
-    if (idx === 0)
-      return first
-    else if (idx === 1)
-      return next
-    else
-      return new Error()
-  }
-}
-
-function first(list) {
-  return list(0)
-}
-
-// fn accepts a list and second item computes itself if thunk 
-function rest(list) {
-  if (list === null)
-    return null
-  else if (list(1) instanceof Thunk)
-    return list(1).realize()
-  else
-    return list(1)
-}
+import {
+  isReduced, cons, first, rest,
+  isAccumlated, reduced, accumlate, delay, toArray, benchmark,
+  generateList, doAll, unAccumlated, unReduced
+} from './helpers.cjs'
 // fn accepts a list and f applies f on first item and applies delay to the rest of the list  
 function map(list, f) {
   if (list === null)
@@ -64,21 +20,6 @@ function filter(list, f) {
     return filter(rest(list), f)
 }
 
-function toString(list) {
-  if (list === null)
-    return new String()
-  else
-    return new String(first(list)) + toString(rest(list))
-}
-
-function toArray(list) {
-  let a = []
-  while (list !== null) {
-    a.push(first(list))
-    list = rest(list)
-  }
-  return a;
-}
 
 function iterate(e, f) {
   return cons(f(e), delay(() => iterate(f(e), f)))
@@ -91,21 +32,6 @@ function take(list, n) {
     return cons(first(list), delay(() => take(rest(list), n - 1)))
 }
 
-function doAll(list) {
-  let curr = list
-  while (curr !== null) {
-    curr = rest(curr)
-  }
-  return list
-}
-
-function generateList(n) {
-  let l = null
-  for (let i = n; i >= 0; i--) {
-    l = cons(i, l)
-  }
-  return l;
-}
 
 function reduce(list, rf, init) {
   let acc = init
@@ -116,22 +42,17 @@ function reduce(list, rf, init) {
   return acc
 }
 
-function benchmark(f, post = (x) => x) {
-  let start = Date.now()
-  let result = f()
-  let end = Date.now()
-  console.log(post(result))
-  console.log(end - start + "ms")
-}
-
 // chain(l4, [map, inc], [filter, isEven], [take, 40], [doAll], [reduce, add, 0])
 // chain(l, [map, inc])
+// 
+let $ = new Object()
 
-function chain(list, ...pairs) {
-  let result = list
-  for (let pair of pairs) {
-    let [seqFn, ...args] = pair
-    result = seqFn(result, ...args)
+function chain(init, ...ops) {
+  let result = init
+  for (let op of ops) {
+    let actualArgs = op.map((arg) => arg === $ ? result : arg)
+    let [fn, ...args] = actualArgs
+    result = fn(...args)
   }
   return result
 }
@@ -140,8 +61,20 @@ let inc = (x) => x + 1
 let isEven = (x) => x % 2 === 0
 let add = (a, b) => a + b
 
-let l4 = generateList(1000000)
-benchmark(() => chain(l4, [map, inc], [filter, isEven], [take, 10000], [doAll]), toArray)
+// let l4 = generateList(1000000)
+// benchmark(() => chain(l4, [map, inc], [filter, isEven], [take, 10000], [doAll])
+//   , toArray)
 
-let l5 = generateList(1000000)
-benchmark(() => chain(l4, [map, inc], [filter, isEven], [take, 10000], [first]))
+// let l5 = generateList(1000000)
+// benchmark(() => chain(l5, [map, inc], [filter, isEven], [take, 10000], [first]))
+
+// benchmark(() => chain(l5, [map, $, inc], [cons, 0, $]), toArray)
+
+
+function chain2(init, ...fs) {
+  return fs.reduce((result, f) => f(result), init)
+}
+
+chain2(5,
+  $ => map(generateList($), inc),
+  $ => filter($, isEven))
