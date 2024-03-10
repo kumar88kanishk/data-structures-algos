@@ -1,7 +1,8 @@
 // 0, 1, 1, 2, 3, 5, 8....
-let cache = {}
+
 
 function memo(f) {
+  let cache = {}
   return function (x) {
     if (cache[x])
       return cache[x]
