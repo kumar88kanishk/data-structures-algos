@@ -68,7 +68,7 @@ let add = (a, b) => a + b
 // let l5 = generateList(1000000)
 // benchmark(() => chain(l5, [map, inc], [filter, isEven], [take, 10000], [first]))
 
-// benchmark(() => chain(l5, [map, $, inc], [cons, 0, $]), toArray)
+benchmark(() => chain(l5, [map, $, inc], [cons, 0, $]), toArray)
 
 
 function chain2(init, ...fs) {
